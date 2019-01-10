@@ -138,8 +138,7 @@ public class Connect {
 
 					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 					int hola = st.executeUpdate("INSERT into comanda (idComanda, idClient, dataComanda, dataLliurament) values (null, "+client+", '"+sdf.format(sqlDate)+"', null)");
-	
-			
+					
 					rs = st.executeQuery("SELECT idProducte, nomProducte, preuVenda, stock FROM producte");
 					System.out.println("Dades de la taula producte:");
 					resultSet = mt.getColumns("ttb", null, "producte", "%");
@@ -166,7 +165,7 @@ public class Connect {
 					}
 					
 					int cd = 0;
-					int ai = 0;
+					int ai = 1;
 					while(cd!=2)
 					{
 					
@@ -178,7 +177,7 @@ public class Connect {
 					int preu = sc.nextInt();
 					
 					hola = st.executeUpdate("INSERT into comanda_linia (idComanda, idLinia, idProducte, quantitat, preuVenda) values ((Select max(idComanda) from comanda), "+ai+", "+producte+", "+qua+", "+preu+")");
-					System.out.println(hola);
+				
 					
 					System.out.println("\nVols afegir una altra linia? (1: SI, 2: NO):");
 					ai++;
@@ -286,12 +285,63 @@ public class Connect {
 					resultSet = null;
 					st = con.createStatement();
 					rs = st.executeQuery("SELECT idComanda FROM comanda WHERE estatComanda = 'PENDENT'");
+					Statement st2 = con.createStatement(); 
+					Statement st3 = con.createStatement(); 
+					try
+					{
+						con.setAutoCommit(false);
+						
+						while(rs.next())
+						{
+							int idc = rs.getInt(1);
+							resultSet = st3.executeQuery("SELECT idProducte, quantitat from comanda_linia WHERE idComanda = "+idc);
+							while(resultSet.next()) 
+							{
+								int idp = resultSet.getInt(1);
+								int qxd = resultSet.getInt(2);
+								int kpasa = st2.executeUpdate("UPDATE producte SET stock = (stock - "+qxd+") WHERE idProducte = "+idp);
+								kpasa = st2.executeUpdate("INSERT into diari_moviments (idComanda, idMoviment, idProducte, observacions, quantitat, tipusMoviment) values ("+idc+", null, "+idp+", '', "+qxd+", 'S')");
+							}
+						}
+					  
+						con.commit();
+						System.out.println("Transacció realitzada");
+					}
+					catch(Exception e)
+					{
+						e.printStackTrace();
+					   con.rollback();
+					   System.out.println("Transacció no realitzada");
+					}
 					
-					
-					
-					
+					con.setAutoCommit(true);
 					break;
 				case 8:
+					
+					st = con.createStatement();
+					rs = st.executeQuery("SELECT idProducte, stockMinim FROM producte WHERE tipusProducte = 'INGREDIENT' and stockMinim > stock");
+					st2 = con.createStatement(); 
+
+					date = new Date();
+					sqlDate = new java.sql.Date(date.getTime());
+					sdf = new SimpleDateFormat("yyyy-MM-dd");
+					
+					Calendar cal = Calendar.getInstance();
+			        cal.setTime(date);
+			        cal.add(Calendar.DATE, 7);
+			        Date date2 = cal.getTime();
+			        java.sql.Date sqlDate2 = new java.sql.Date(date.getTime());
+			        
+			        
+					while(rs.next())
+					{
+						int idp = rs.getInt(1);
+						int sm = rs.getInt(2);
+						
+						int yaves = st2.executeUpdate("INSERT into ordre_compra (dataOrdre, dataRecepcio, idOrdre, idProducte, quantitat) values ()");
+						
+					}
+					
 					break;
 				case 9:
 					break;
