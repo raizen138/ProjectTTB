@@ -30,6 +30,7 @@ public class Connect {
 		propietatsConnexio.put("user", "root");
 		propietatsConnexio.put("password", "super3");
 		propietatsConnexio.put("serverTimezone", "GMT+1");
+		propietatsConnexio.put("zeroDateTimeBehaviour", "convertToNull");
 		
 		
 		try {
@@ -326,6 +327,7 @@ public class Connect {
 					sqlDate = new java.sql.Date(date.getTime());
 					sdf = new SimpleDateFormat("yyyy-MM-dd");
 					
+					
 					Calendar cal = Calendar.getInstance();
 			        cal.setTime(date);
 			        cal.add(Calendar.DATE, 7);
@@ -337,15 +339,61 @@ public class Connect {
 					{
 						int idp = rs.getInt(1);
 						int sm = rs.getInt(2);
+						sm = sm * 2;
 						
-						int yaves = st2.executeUpdate("INSERT into ordre_compra (dataOrdre, dataRecepcio, idOrdre, idProducte, quantitat) values ()");
-						
+						int yaves = st2.executeUpdate("INSERT into ordre_compra (dataOrdre, dataRecepcio, idOrdre, idProducte, quantitat) values ('"+sdf.format(sqlDate)+"', '"+sdf.format(sqlDate2)+"', null, "+idp+", "+sm+")");
+					}
+					
+					System.out.println("Ordres fetes");
+			
+					break;
+				case 9:
+					resultSet = null;
+					st = con.createStatement();
+					rs = st.executeQuery("SELECT * FROM ordre_compra ORDER BY idProducte");
+					
+					System.out.println("Ordres Compra:");
+					resultSet = mt.getColumns("ttb", null, "ordre_compra", "%");
+					System.out.print("| ");
+					while (resultSet.next()) {
+					System.out.print(resultSet.getString(4)+" | ");
+					}
+					System.out.println();
+					
+					while (rs.next()) {
+						 int numColumns = rs.getMetaData().getColumnCount();
+						 System.out.print("| ");
+						 for ( int i = 1 ; i <= numColumns ; i++ ) 
+						 	{
+				               System.out.print(rs.getObject(i)+" | ");
+				            }
+						 System.out.println();
 					}
 					
 					break;
-				case 9:
-					break;
 				case 10:
+					
+					resultSet = null;
+					st = con.createStatement();
+					rs = st.executeQuery("SELECT * FROM diari_moviments");
+					
+					System.out.println("Diari Moviments:");
+					resultSet = mt.getColumns("ttb", null, "diari_moviments", "%");
+					System.out.print("| ");
+					while (resultSet.next()) {
+					System.out.print(resultSet.getString(4)+" | ");
+					}
+					System.out.println();
+					
+					while (rs.next()) {
+						 int numColumns = rs.getMetaData().getColumnCount();
+						 System.out.print("| ");
+						 for ( int i = 1 ; i <= numColumns ; i++ ) 
+						 	{
+				               System.out.print(rs.getObject(i)+" | ");
+				            }
+						 System.out.println();
+					}
 					break;
 				case 0:
 					break;
